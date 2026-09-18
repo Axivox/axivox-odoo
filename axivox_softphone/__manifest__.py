@@ -22,7 +22,7 @@ An Axivox account is required.
     "author": "Axivox",
     "website": "https://www.axivox.com",
     "category": "Productivity/Voip",
-    "version": "19.0.1.0.14",
+    "version": "18.0.1.0.14",
     "license": "LGPL-3",
     "application": True,
     "installable": True,
