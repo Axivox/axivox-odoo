@@ -33,8 +33,8 @@ One branch per Odoo series. Take the one that matches your server, nothing else.
 
 ## Installing
 
-No external Python dependency: nothing to `pip install`. Replace `18.0` below
-with your own series.
+No external Python dependency: nothing to `pip install`. The examples below
+use `17.0`, the series this branch is for.
 
 ### Odoo.sh
 
@@ -42,7 +42,7 @@ Add this repository as a submodule of yours. Odoo.sh detects it and puts it in
 the addons path on its own.
 
 ```bash
-git submodule add -b 18.0 https://github.com/Axivox/axivox-odoo.git axivox-odoo
+git submodule add -b 17.0 https://github.com/Axivox/axivox-odoo.git axivox-odoo
 git commit -m "Add the Axivox modules" && git push
 ```
 
@@ -52,7 +52,7 @@ Clone the repository somewhere, then add **that directory** to `addons_path`
 in your Odoo configuration: the module folders sit at its root.
 
 ```bash
-git clone --branch 18.0 https://github.com/Axivox/axivox-odoo.git /opt/axivox-odoo
+git clone --branch 17.0 https://github.com/Axivox/axivox-odoo.git /opt/axivox-odoo
 # odoo.conf:  addons_path = /usr/lib/python3/dist-packages/odoo/addons,/opt/axivox-odoo
 ```
 
@@ -88,7 +88,7 @@ Take your usual backup first, as for any module upgrade.
 
 ### How we number releases
 
-The version in each manifest starts with the Odoo series: `18.0.1.0.3`. Only
+The version in each manifest starts with the Odoo series: `17.0.1.0.3`. Only
 the part after the series moves between releases, and it always moves up. That
 number is the whole mechanism: Odoo compares it with what it recorded at
 install time, so a fix shipped without raising it would never be offered to
