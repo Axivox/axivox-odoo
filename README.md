@@ -33,15 +33,66 @@ One branch per Odoo series. Take the one that matches your server, nothing else.
 
 ## Installing
 
-Copy the module folder you want into your addons path, restart Odoo, then update
-the app list and install it from the Apps menu.
+No external Python dependency: nothing to `pip install`. Replace `18.0` below
+with your own series.
+
+### Odoo.sh
+
+Add this repository as a submodule of yours. Odoo.sh detects it and puts it in
+the addons path on its own.
 
 ```bash
-git clone --branch 18.0 https://github.com/Axivox/axivox-odoo.git
-cp -r axivox-odoo/axivox /path/to/your/addons/
+git submodule add -b 18.0 https://github.com/Axivox/axivox-odoo.git axivox-odoo
+git commit -m "Add the Axivox modules" && git push
 ```
 
-No external Python dependency: nothing to `pip install`.
+### Community, self-hosted
+
+Clone the repository somewhere, then add **that directory** to `addons_path`
+in your Odoo configuration: the module folders sit at its root.
+
+```bash
+git clone --branch 18.0 https://github.com/Axivox/axivox-odoo.git /opt/axivox-odoo
+# odoo.conf:  addons_path = /usr/lib/python3/dist-packages/odoo/addons,/opt/axivox-odoo
+```
+
+Restart Odoo, then Apps, Update Apps List, and install the module you want.
+Copying the folder into an existing addons directory works too, but cloning is
+what makes the updates below a single command.
+
+## Updating
+
+**Odoo never downloads a new version of a third-party module.** The Apps screen
+only reads what is already in the addons path, and offers the upgrade once it
+finds a version number higher than the one recorded when you installed. So the
+files come first, Odoo second.
+
+### Odoo.sh
+
+```bash
+git submodule update --remote axivox-odoo
+git commit -am "Update the Axivox modules" && git push
+```
+
+Odoo.sh rebuilds the branch and applies the upgrade by itself.
+
+### Community, self-hosted
+
+```bash
+cd /opt/axivox-odoo && git pull
+odoo -c /etc/odoo/odoo.conf -d YOUR_DATABASE -u axivox,axivox_softphone --stop-after-init
+```
+
+Or, from the interface: Apps, Update Apps List, then Upgrade on the module.
+Take your usual backup first, as for any module upgrade.
+
+### How we number releases
+
+The version in each manifest starts with the Odoo series: `18.0.1.0.3`. Only
+the part after the series moves between releases, and it always moves up. That
+number is the whole mechanism: Odoo compares it with what it recorded at
+install time, so a fix shipped without raising it would never be offered to
+anyone.
 
 ## The call log, in short
 
