@@ -1,0 +1,198 @@
+// Axivox softphone panel.
+// Brand colours: ink and aqua, the same as the customer portal.
+
+$axivox-ink: #101c37;
+$axivox-aqua: #2ad2c1;
+
+// While the panel is open the page keeps at least the room the softphone needs;
+// a smaller window then scrolls the page. Odoo hides the page overflow: we open it
+// on the axis that needs it, and only then.
+html.o_axivox_min_x,
+html.o_axivox_min_x > body {
+    overflow-x: auto !important;
+}
+
+html.o_axivox_min_y,
+html.o_axivox_min_y > body {
+    overflow-y: auto !important;
+}
+
+.o_axivox_root {
+    // The icon's block lives in the page, under the softphone: placed by the script
+    // (left/top in page coordinates), it scrolls with the page when the window is
+    // too small for the block.
+    position: absolute;
+    left: calc(100% - 70px);
+    top: calc(100% - 70px);
+    z-index: 1041; // above the content and above the panel it sits on, below Odoo's own dialogs
+    // The block IS the icon; the panel hangs off it in absolute position. That
+    // way dragging only has a 54px box to keep inside the viewport, instead of
+    // the whole open panel.
+    width: 48px;
+    height: 48px;
+
+    &.o_axivox_stowed {
+        display: none;
+    }
+
+    &.o_axivox_dragging .o_axivox_tray {
+        cursor: grabbing;
+    }
+}
+
+// While an icon is being dragged, no text anywhere should get selected.
+body.o_axivox_dragging {
+    user-select: none;
+}
+
+.o_axivox_panel {
+    // A child of the page, placed by the script from the icon's position, at the
+    // size the softphone announced (see layout()); scrolls with the page when the
+    // page is taller than the window. A panel taller than the room around the
+    // icon goes beside it instead of shrinking.
+    position: absolute;
+    z-index: 1040;
+
+    &.o_axivox_stowed {
+        display: none;
+    }
+    // The normal size of the softphone, until its first "resize" message.
+    width: 384px;
+    height: 720px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 12px 40px rgba(16, 28, 55, 0.28);
+
+    &[hidden] {
+        display: none;
+    }
+
+    iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        display: block;
+    }
+}
+
+.o_axivox_tray {
+    position: relative;
+    // as tall as a tab of the softphone: it sits in their row when the panel is open
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: 50%;
+    background: $axivox-ink;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    // Required for a touch drag: without it the browser scrolls the page
+    // instead of sending us pointermove.
+    touch-action: none;
+    box-shadow: 0 6px 18px rgba(16, 28, 55, 0.35);
+    transition: transform 0.12s ease, background-color 0.12s ease;
+
+    &:hover {
+        background: lighten($axivox-ink, 8%);
+    }
+
+    // The focus ring is essential: the button is reachable by keyboard.
+    &:focus-visible {
+        outline: 3px solid $axivox-aqua;
+        outline-offset: 2px;
+    }
+
+    &:active {
+        transform: scale(0.94);
+    }
+}
+
+// SIP registration dot: shown means the extension is reachable.
+.o_axivox_dot {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: $axivox-aqua;
+    border: 2px solid $axivox-ink;
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+// Missed calls not looked at yet: a red count on the button, top left, away
+// from the registration dot. The softphone clears it once its history is opened.
+.o_axivox_badge {
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    box-sizing: border-box;
+    border-radius: 9px;
+    border: 2px solid #fff;
+    background: #c33633;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 14px;
+    text-align: center;
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+// While a call rings, two soft green circles breathe around the button.
+.o_axivox_tray.o_axivox_ringing {
+    &::before,
+    &::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+        animation: o_axivox_ring 1.6s ease-in-out infinite;
+    }
+
+    &::before {
+        inset: -8px;
+        border: 3px solid rgba(29, 143, 104, 0.5);
+    }
+
+    &::after {
+        inset: -16px;
+        border: 2px solid rgba(29, 143, 104, 0.25);
+        animation-delay: 0.3s;
+    }
+}
+
+@keyframes o_axivox_ring {
+    0%, 100% { transform: scale(0.9); opacity: 0.35; }
+    50% { transform: scale(1.04); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .o_axivox_tray {
+        transition: none;
+    }
+
+    // a remote desktop often reports reduced motion on the person's behalf:
+    // the circles keep pulsing, in opacity alone, without any movement
+    .o_axivox_tray.o_axivox_ringing::before,
+    .o_axivox_tray.o_axivox_ringing::after {
+        animation-name: o_axivox_ring_soft;
+        animation-duration: 2.4s;
+    }
+}
+
+@keyframes o_axivox_ring_soft {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+}

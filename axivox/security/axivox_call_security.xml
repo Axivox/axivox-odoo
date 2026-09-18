@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- A phone call is personal: like Odoo's own call log, everyone sees
+             their own. Record rules attached to groups are OR-ed, so the group
+             below widens this one rather than fighting it. -->
+        <record id="axivox_call_rule_own" model="ir.rule">
+            <field name="name">Call: own calls</field>
+            <field name="model_id" ref="model_axivox_call"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+    </data>
+
+    <record id="group_axivox_all_calls" model="res.groups">
+        <field name="name">Axivox: all calls</field>
+        <!-- ni category_id ni users : ces deux champs de res.groups existent en
+             Odoo 17 et 18 mais ont disparu en 19, verifie sur les trois. On s en
+             tient a ce que les trois versions ont, name et comment. -->
+        <field name="comment">Sees and writes every call, not only their own. The
+            account the Axivox connector authenticates with needs this: it files a
+            call under the agent who made it, so without this it could not read
+            back what it just wrote.</field>
+    </record>
+
+    <data noupdate="1">
+        <record id="axivox_call_rule_all" model="ir.rule">
+            <field name="name">Call: all calls</field>
+            <field name="model_id" ref="model_axivox_call"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_axivox_all_calls'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+    </data>
+</odoo>
