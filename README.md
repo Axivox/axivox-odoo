@@ -11,6 +11,16 @@ cloud telephony provider.
 Both modules are free and published under the LGPL-3 licence. An Axivox account
 is required to use them.
 
+## Where each one runs
+
+| Module | Odoo Online | Odoo.sh | Community |
+|---|:---:|:---:|:---:|
+| `axivox` | no | yes | yes |
+| `axivox_softphone` | yes | yes | yes |
+
+`axivox` adds a model and server-side code, which Odoo Online does not allow.
+`axivox_softphone` adds none: no model, no field, no table, no server-side code.
+
 ## Which branch to install
 
 One branch per Odoo series. Take the one that matches your server, nothing else.
