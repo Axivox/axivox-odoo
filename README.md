@@ -33,8 +33,8 @@ One branch per Odoo series. Take the one that matches your server, nothing else.
 
 ## Installing
 
-No external Python dependency: nothing to `pip install`. Replace `18.0` below
-with your own series.
+No external Python dependency: nothing to `pip install`. The examples below
+use `18.0`, the series this branch is for.
 
 ### Odoo.sh
 
