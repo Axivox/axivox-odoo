@@ -23,8 +23,15 @@ changes for you if you move to Enterprise one day.
 - A Calls button on each contact.
 - List, calendar, graph and pivot views to look at the whole thing.
 
-This module only stores what the Axivox connector sends it. An Axivox account
-is required.
+Where it runs
+-------------
+
+Odoo Community and Odoo.sh. This module adds a model and server-side code, so
+it cannot be installed on Odoo Online.
+
+This module only stores what the Axivox connector sends it: it holds no
+credential, calls nothing on its own, and collects nothing from your Odoo. An
+Axivox account is required.
 """,
     "author": "Axivox",
     "website": "https://www.axivox.com",
@@ -41,5 +48,8 @@ is required.
         "views/axivox_call_views.xml",
         "views/res_partner_views.xml",
     ],
-    "images": ["static/description/icon.png"],
+    "images": [
+        "static/description/banner.png",
+        "static/description/main_screenshot.png",
+    ],
 }
