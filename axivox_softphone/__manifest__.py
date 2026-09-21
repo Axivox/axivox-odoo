@@ -30,7 +30,7 @@ An Axivox account is required.
     "author": "Axivox",
     "website": "https://www.axivox.com",
     "category": "Productivity/Voip",
-    "version": "17.0.1.0.14",
+    "version": "1.0.15",
     "license": "LGPL-3",
     "application": True,
     "installable": True,
