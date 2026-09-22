@@ -32,13 +32,17 @@
     /* The database of this Odoo, read from the web client's own session module.
      * The softphone uses it to know that this page IS its CRM, whatever the host
      * name (a custom domain in front of Odoo is the same Odoo). Empty when the
-     * page is not an Odoo web client, or another version keeps it elsewhere. */
+     * page is not an Odoo web client. Three places are read, because three
+     * generations of Odoo keep it in three different ones. */
     function hostDb() {
         try {
             var o = window.odoo;
             var s = o && o.loader && o.loader.modules && o.loader.modules.get('@web/session');
             if (s && s.session && s.session.db) return String(s.session.db);
             if (o && o.info && o.info.db) return String(o.info.db);
+            // Odoo 14 ne connait ni le module de session ni odoo.info : il
+            // depose la session dans une globale, et rien d'autre ne la porte.
+            if (o && o.session_info && o.session_info.db) return String(o.session_info.db);
         } catch (e) { /* not our business */ }
         return '';
     }

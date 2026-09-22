@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <div name="button_box" position="inside">
                 <button class="oe_stat_button" type="object" icon="fa-phone"
-                        name="action_axivox_calls" invisible="axivox_call_count == 0">
+                        name="action_axivox_calls" attrs="{'invisible': [('axivox_call_count','=',0)]}">
                     <field string="Calls" name="axivox_call_count" widget="statinfo"/>
                 </button>
             </div>
