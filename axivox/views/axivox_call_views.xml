@@ -73,7 +73,7 @@
                         <field name="transcript" nolabel="1" readonly="1"/>
                     </div>
                 </sheet>
-                <chatter/>
+                <div class="oe_chatter"><field name="message_follower_ids"/><field name="message_ids"/></div>
             </form>
         </field>
     </record>
