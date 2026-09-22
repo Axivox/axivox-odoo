@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Odoo 14 n'a pas la cle `assets` du manifeste : les ressources
+     s'ajoutent au paquet du client web par heritage de gabarit.
+     Ce fichier est fabrique par tools/adapt.py depuis cette meme
+     liste, il ne s'edite pas a la main. -->
+<odoo>
+    <template id="assets_backend" inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+            <link rel="stylesheet" type="text/scss" href="/axivox_softphone/static/src/scss/softphone.scss"/>
+            <script type="text/javascript" src="/axivox_softphone/static/src/js/softphone_panel.js"/>
+            <script type="text/javascript" src="/axivox_softphone/static/src/js/softphone_odoo.js"/>
+        </xpath>
+    </template>
+</odoo>

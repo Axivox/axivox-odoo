@@ -5,7 +5,7 @@
         <field name="name">axivox.call.list</field>
         <field name="model">axivox.call</field>
         <field name="arch" type="xml">
-            <list string="Calls" create="false" edit="false"
+            <tree string="Calls" create="false" edit="false"
                   decoration-muted="state in ('aborted','rejected')"
                   decoration-danger="state == 'missed'">
                 <field name="start_date"/>
@@ -25,7 +25,7 @@
                 <field name="escalation" optional="hide"/>
                 <field name="transcription_status" optional="hide"/>
                 <field name="end_date" optional="hide"/>
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -55,19 +55,25 @@
                             <field name="transcription_status" readonly="1"/>
                         </group>
                     </group>
-                    <group string="Analysis" invisible="not sentiment and not themes and not escalation">
+                    <group string="Analysis" attrs="{'invisible': [('sentiment','=',False),('themes','=',False),('escalation','=',False)]}">
                         <field name="sentiment" readonly="1"/>
                         <field name="escalation" readonly="1"/>
                         <field name="themes" readonly="1"/>
                     </group>
-                    <group string="Summary" invisible="not summary">
+                    <!-- Hors du groupe a deux colonnes, et sans etiquette : un resume
+                         et une transcription ont besoin de toute la largeur de la
+                         feuille. Dans un <group> ils tombent dans la colonne des
+                         valeurs et le texte se casse sur vingt caracteres. -->
+                    <div attrs="{'invisible': [('summary','=',False)]}">
+                        <separator string="Summary"/>
                         <field name="summary" nolabel="1" readonly="1"/>
-                    </group>
-                    <group string="Transcript" invisible="not transcript">
+                    </div>
+                    <div attrs="{'invisible': [('transcript','=',False)]}">
+                        <separator string="Transcript"/>
                         <field name="transcript" nolabel="1" readonly="1"/>
-                    </group>
+                    </div>
                 </sheet>
-                <chatter/>
+                <div class="oe_chatter"><field name="message_follower_ids" widget="mail_followers"/><field name="message_ids" widget="mail_thread"/></div>
             </form>
         </field>
     </record>
@@ -142,7 +148,7 @@
         <field name="model">axivox.call</field>
         <field name="arch" type="xml">
             <calendar string="Calls" date_start="start_date" date_stop="end_date"
-                      color="user_id" mode="week" quick_create="0">
+                      color="user_id" mode="week">
                 <field name="phone_number"/>
                 <field name="partner_id"/>
             </calendar>
@@ -152,7 +158,7 @@
     <record id="axivox_call_action" model="ir.actions.act_window">
         <field name="name">Calls</field>
         <field name="res_model">axivox.call</field>
-        <field name="view_mode">list,form,calendar,graph,pivot</field>
+        <field name="view_mode">tree,form,calendar,graph,pivot</field>
         <field name="search_view_id" ref="axivox_call_view_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">No call yet</p>
