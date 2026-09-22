@@ -30,6 +30,14 @@ One branch per Odoo series. Take the one that matches your server, nothing else.
 | 19.0 Community or Enterprise | `19.0` |
 | 18.0 Community or Enterprise | `18.0` |
 | 17.0 Community or Enterprise | `17.0` |
+| 16.0 Community or Enterprise | `16.0` |
+| 15.0 Community or Enterprise | `15.0` |
+| 14.0 Community or Enterprise | `14.0` |
+
+Odoo's own standard support has ended for 16.0 and below. The branches are here
+because Odoo still hosts those series, and because a working phone integration
+should not be the reason you have to upgrade. They receive the same code as the
+others.
 
 ## Installing
 
@@ -88,11 +96,15 @@ Take your usual backup first, as for any module upgrade.
 
 ### How we number releases
 
-The version in each manifest starts with the Odoo series: `19.0.1.0.3`. Only
-the part after the series moves between releases, and it always moves up. That
-number is the whole mechanism: Odoo compares it with what it recorded at
-install time, so a fix shipped without raising it would never be offered to
-anyone.
+Each manifest carries a plain version number, without the Odoo series in front
+of it. Odoo puts the series there itself when it records what you installed, so
+the same number reads as a `19.0` release on your server. Only that number
+moves between releases, and it always moves up: Odoo compares it with what it
+recorded at install time, so a fix shipped without raising it would never be
+offered to anyone.
+
+A number written with a series in front of it would pin the module to that one
+series, and Odoo would refuse to install it anywhere else.
 
 ## The call log, in short
 
