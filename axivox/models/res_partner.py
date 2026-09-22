@@ -29,7 +29,7 @@ class ResPartner(models.Model):
             "type": "ir.actions.act_window",
             "name": "Calls",
             "res_model": "axivox.call",
-            "view_mode": "list,form",
+            "view_mode": "tree,form",
             "domain": [("partner_id", "=", self.id)],
             "context": {"default_partner_id": self.id},
         }
