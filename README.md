@@ -27,6 +27,7 @@ One branch per Odoo series. Take the one that matches your server, nothing else.
 
 | Odoo | Branch |
 |---|---|
+| 20.0 Community or Enterprise | `20.0` |
 | 19.0 Community or Enterprise | `19.0` |
 | 18.0 Community or Enterprise | `18.0` |
 | 17.0 Community or Enterprise | `17.0` |
