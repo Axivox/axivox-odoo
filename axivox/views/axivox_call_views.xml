@@ -60,12 +60,18 @@
                         <field name="escalation" readonly="1"/>
                         <field name="themes" readonly="1"/>
                     </group>
-                    <group string="Summary" invisible="not summary">
+                    <!-- Hors du groupe a deux colonnes, et sans etiquette : un resume
+                         et une transcription ont besoin de toute la largeur de la
+                         feuille. Dans un <group> ils tombent dans la colonne des
+                         valeurs et le texte se casse sur vingt caracteres. -->
+                    <div invisible="not summary">
+                        <separator string="Summary"/>
                         <field name="summary" nolabel="1" readonly="1"/>
-                    </group>
-                    <group string="Transcript" invisible="not transcript">
+                    </div>
+                    <div invisible="not transcript">
+                        <separator string="Transcript"/>
                         <field name="transcript" nolabel="1" readonly="1"/>
-                    </group>
+                    </div>
                 </sheet>
                 <chatter/>
             </form>

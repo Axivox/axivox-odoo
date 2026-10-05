@@ -1,0 +1,4 @@
+id,name,model_id,group_id/id,operation,domain
+access_axivox_call_user,Call: own calls,axivox.call,base.group_user,cru,"[('user_id', '=', user.id)]"
+access_axivox_call_all,Call: all calls,axivox.call,axivox.group_axivox_all_calls,cru,
+access_axivox_call_manager,axivox.call manager,axivox.call,base.group_system,crud,
