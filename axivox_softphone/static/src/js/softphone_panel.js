@@ -47,6 +47,29 @@
         return '';
     }
 
+    /* Ask once for the right to show call notifications. Nothing happens when
+     * Odoo already obtained it, or when the person refused it. */
+    function askNotifications() {
+        try {
+            if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+                var p = Notification.requestPermission();
+                if (p && p.catch) p.catch(function () {});
+            }
+        } catch (e) { /* not supported */ }
+    }
+
+    /* The title in the language of the Odoo user, which the web client writes
+     * on the page (lang="fr-FR"). */
+    var INCOMING = {
+        fr: 'Appel entrant', en: 'Incoming call', nl: 'Inkomende oproep',
+        de: 'Eingehender Anruf', es: 'Llamada entrante', it: 'Chiamata in arrivo',
+        pl: 'Po\u0142\u0105czenie przychodz\u0105ce', pt: 'Chamada recebida'
+    };
+    function incomingTitle() {
+        var lang = String(document.documentElement.getAttribute('lang') || navigator.language || 'en').slice(0, 2).toLowerCase();
+        return INCOMING[lang] || INCOMING.en;
+    }
+
     function createButton() {
         // A real <button>: reachable by keyboard and announced by screen
         // readers, which a clickable <div> is not.
@@ -107,6 +130,8 @@
             // A drag ends with a click on the icon: it must not toggle.
             if (self.suppressClick) { self.suppressClick = false; return; }
             self.toggle();
+            // a click is the gesture a browser wants before it asks
+            askNotifications();
         });
         this.enableDrag();
 
@@ -402,8 +427,8 @@
         if (m.type === 'ready') { this.ready = true; this.tellRoom(); }
         if (m.type === 'registered') this.dot(m.registered);
         // the softphone says whether the person wants the panel opened for them (a menu choice, default yes)
-        if (m.type === 'incomingCall') { if (m.autoOpen !== false) this.show(); this.ring(m.id, true); }
-        if (m.type === 'callAnswered' || m.type === 'callEnded') this.ring(m.id, false);
+        if (m.type === 'incomingCall') { if (m.autoOpen !== false) this.show(); this.ring(m.id, true); this.notify(m.id, m.from); }
+        if (m.type === 'callAnswered' || m.type === 'callEnded') { this.ring(m.id, false); this.unnotify(m.id); }
         if (m.type === 'missed') this.badge(m.count);
         if (m.type === 'resize') this.resize(m.width, m.height);
         if (m.type === 'navigate') this.navigate(m.path ? { path: m.path } : { url: m.url });
@@ -424,6 +449,50 @@
     /* While a call rings, the button breathes: the panel opens by itself, but
      * a person looking elsewhere on a wide screen sees the movement first.
      * Several calls may ring at once; the movement stops with the last one. */
+    /* A system notification for a call that rings while the person is in
+     * another window (Excel, Outlook) or another tab.
+     *
+     * The softphone cannot show it itself: Chrome and Edge refuse the
+     * notification permission to a frame from another site, and the softphone
+     * is one (phone.axivox.com inside this Odoo). This page is the Odoo site,
+     * which may ask, and often already has the permission for Odoo's own
+     * notifications. */
+    Panel.prototype.notify = function (id, from) {
+        if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+        // the person is looking at Odoo: the panel and the ringing button say it
+        if (document.visibilityState === 'visible' && document.hasFocus()) return;
+        var key = id === undefined || id === null ? '*' : String(id);
+        this.notes = this.notes || {};
+        if (this.notes[key]) return;
+        var self = this;
+        try {
+            var n = new Notification(incomingTitle(), {
+                body: String(from || ''),
+                tag: 'axivox-incoming-' + key,
+                // stays on screen while it rings; closed by unnotify() when
+                // the call is answered or ends
+                requireInteraction: true
+            });
+            n.onclick = function () {
+                window.focus();
+                self.show();
+                n.close();
+            };
+            this.notes[key] = n;
+        } catch (e) { /* a browser that refuses page notifications */ }
+    };
+
+    Panel.prototype.unnotify = function (id) {
+        this.notes = this.notes || {};
+        var key = id === undefined || id === null ? '*' : String(id);
+        var keys = key === '*' ? Object.keys(this.notes) : [key];
+        for (var i = 0; i < keys.length; i++) {
+            var n = this.notes[keys[i]];
+            if (n) { try { n.close(); } catch (e) { /* already gone */ } }
+            delete this.notes[keys[i]];
+        }
+    };
+
     Panel.prototype.ring = function (id, on) {
         this.ringing = this.ringing || {};
         var key = id === undefined || id === null ? '*' : String(id);
