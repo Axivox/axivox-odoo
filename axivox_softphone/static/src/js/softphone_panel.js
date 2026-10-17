@@ -549,12 +549,28 @@
     };
 
     /* Dial. The softphone filters again on its side: this is only a first pass
-     * so we do not send it just anything. */
-    Panel.prototype.dial = function (number) {
+     * so we do not send it just anything.
+     *
+     * `vars` are the call variables read from the page, for instance the record
+     * the user was looking at. Same stance as the number: a first pass here,
+     * and the softphone checks them again before they reach the INVITE. */
+    Panel.prototype.dial = function (number, vars) {
         var n = String(number || '').replace(/^tel:/i, '').replace(/[^0-9+*#]/g, '');
         if (!n) return false;
+        var v = {};
+        if (vars && typeof vars === 'object') {
+            Object.keys(vars).forEach(function (k) {
+                // Meme forme que partout dans la chaine. Une valeur vide ne veut
+                // rien dire : on ne l envoie pas.
+                if (!/^[A-Za-z_][A-Za-z0-9_]{0,63}$/.test(k)) return;
+                var val = String(vars[k] == null ? '' : vars[k]);
+                if (val === '') return;
+                if (val.length > 256) val = val.slice(0, 256);
+                v[k] = val;
+            });
+        }
         this.show();
-        this.send('dial', { number: n });
+        this.send('dial', { number: n, vars: v });
         return true;
     };
 
