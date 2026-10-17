@@ -26,6 +26,49 @@
         );
     }
 
+    /* What record the user is looking at, read from the URL and nothing else.
+     *
+     * ⭐ The URL on purpose, not Odoo's internals. This module hooks the page
+     * through two things only, "tel:" links and window.location, which is why
+     * it runs from 14 to 20 without a single per-version branch. Reaching into
+     * the web client for resModel/resId would mean one implementation for
+     * odoo.define and another for OWL, to redo at every major version.
+     *
+     * 🔴 And we never resolve an action path into a model: that would be an RPC
+     * against the customer's database, and this module promises it reads none
+     * of their data. The mapping belongs in their call event rule, where they
+     * already pick the Odoo model.
+     *
+     * So every name here says exactly what it holds, and nothing is posted
+     * unless the URL really carries it:
+     *   /odoo/sales/537            -> odoo_source_path  = sales       (an ACTION, not a model)
+     *   /odoo/m-sale.order/537     -> odoo_source_model = sale.order  (a real model)
+     *   /web#id=537&model=sale.order -> odoo_source_model = sale.order
+     */
+    function odooSource() {
+        var out = {};
+        var p = window.location.pathname || '';
+        var h = window.location.hash || '';
+
+        // Odoo 17+ : /odoo/<action>/<id>. The action may be a path (sales), an
+        // action id (action-123), or m-<model> when no action carries the model.
+        var m = p.match(/^\/odoo\/([^\/?#]+)\/(\d+)(?:[\/?#]|$)/);
+        if (m) {
+            var seg = m[1];
+            if (seg.indexOf('m-') === 0 && seg.length > 2) out.odoo_source_model = seg.slice(2);
+            else out.odoo_source_path = seg;
+            out.odoo_source_id = m[2];
+            return out;
+        }
+
+        // Odoo <= 16 : the hash carries the real model, so we can say "model".
+        var hid = h.match(/[#&]id=(\d+)/);
+        var hmo = h.match(/[#&]model=([A-Za-z0-9_.]+)/);
+        if (hid) out.odoo_source_id = hid[1];
+        if (hmo) out.odoo_source_model = hmo[1];
+        return out;
+    }
+
     /* The number behind a click, if any. Odoo renders phone fields as "tel:"
      * links, which is the most stable hook. */
     function numberFromClick(ev) {
@@ -83,7 +126,9 @@
         document.addEventListener('click', function (ev) {
             var number = numberFromClick(ev);
             if (!number) return;
-            if (!panel.dial(number)) return;
+            // Le dossier regarde au moment du clic part avec l appel : c est
+            // tout l interet du clic-pour-appeler depuis une fiche.
+            if (!panel.dial(number, odooSource())) return;
             ev.preventDefault();
             ev.stopPropagation();
         }, true);
