@@ -42,6 +42,7 @@
      * So every name here says exactly what it holds, and nothing is posted
      * unless the URL really carries it:
      *   /odoo/sales/537            -> odoo_source_path  = sales       (an ACTION, not a model)
+     *   /odoo/helpdesk/3/tickets/42 -> odoo_source_path = tickets, odoo_source_id = 42
      *   /odoo/m-sale.order/537     -> odoo_source_model = sale.order  (a real model)
      *   /web#id=537&model=sale.order -> odoo_source_model = sale.order
      */
@@ -50,9 +51,16 @@
         var p = window.location.pathname || '';
         var h = window.location.hash || '';
 
-        // Odoo 17+ : /odoo/<action>/<id>. The action may be a path (sales), an
+        // Odoo 18+ : /odoo/<action>/<id>. The action may be a path (sales), an
         // action id (action-123), or m-<model> when no action carries the model.
-        var m = p.match(/^\/odoo\/([^\/?#]+)\/(\d+)(?:[\/?#]|$)/);
+        // 🔴 A record opened from another one adds a pair to the URL:
+        // /odoo/helpdesk/3/tickets/42 is ticket 42 opened from team 3. The
+        // record on screen is the LAST pair; the first one is only its parent.
+        var m = null;
+        if (p.indexOf('/odoo/') === 0) {
+            var rest = p.slice(5), re = /\/([^\/?#]+)\/(\d+)(?=[\/?#]|$)/g, r;
+            while ((r = re.exec(rest)) !== null) m = r;
+        }
         if (m) {
             var seg = m[1];
             if (seg.indexOf('m-') === 0 && seg.length > 2) out.odoo_source_model = seg.slice(2);
