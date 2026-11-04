@@ -77,17 +77,50 @@
         return out;
     }
 
-    /* The number behind a click, if any. Odoo renders phone fields as "tel:"
-     * links, which is the most stable hook. */
+    /* The number behind a click, if any.
+     *
+     * Up to Odoo 19.0 a phone field renders its number as a "tel:" link, the
+     * most stable hook there is. From Odoo saas 19.3 the link is gone: the
+     * number is plain text (a <span> when read-only, an <input> when editing)
+     * next to a "Call" button handled in JavaScript, and Odoo's own Phone
+     * module takes that click for its softphone. We listen in the capture
+     * phase, before any handler of Odoo, so stopping the event there is enough
+     * for the call to go to the panel instead. Measured on a saas 19.3 base on
+     * 04/11/2026, where the module had gone silent since the upgrade. */
     function numberFromClick(ev) {
-        var a = ev.target && ev.target.closest ? ev.target.closest('a[href^="tel:"]') : null;
+        var t = ev.target;
+        if (!t || !t.closest) return null;
+
+        var a = t.closest('a[href^="tel:"]');
         if (a) return decodeURIComponent(a.getAttribute('href').slice(4));
+
+        // The "Call" button of a phone field, told by its icon: the same row
+        // carries other actions (an SMS button, for one) that are not ours.
+        var btn = t.closest('button');
+        if (btn && btn.querySelector('.fa-phone')) {
+            var number = numberFromField(btn);
+            if (number) return number;
+        }
 
         // Some views show a number without a link, so we also accept an
         // explicitly marked element. That allows adding hooks through
         // customisation without touching this module.
-        var m = ev.target && ev.target.closest ? ev.target.closest('[data-axivox-tel]') : null;
+        var m = t.closest('[data-axivox-tel]');
         return m ? m.getAttribute('data-axivox-tel') : null;
+    }
+
+    /* The number shown by the phone field a "Call" button belongs to. The
+     * field wrapper is the natural scope; failing that, the two elements above
+     * the button are the field's own template: the number, then the actions. */
+    function numberFromField(btn) {
+        var scope = btn.closest('.o_field_phone') ||
+            (btn.parentElement && btn.parentElement.parentElement);
+        if (!scope) return null;
+        var input = scope.querySelector('input[type="tel"], input.o_input');
+        if (input && input.value && input.value.trim()) return input.value.trim();
+        var span = scope.querySelector('span.o_force_ltr');
+        var text = span ? span.textContent.trim() : '';
+        return text || null;
     }
 
     /* Odoo is a single-page application: neither "load" nor "navigate" fires
