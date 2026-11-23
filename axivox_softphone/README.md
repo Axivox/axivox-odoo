@@ -43,6 +43,18 @@ contact surface with the framework is limited to injecting the files, which
 keeps the module portable across Odoo versions. The only difference between the
 18.0 and 19.0 branches is the version prefix Odoo requires.
 
+**Odoo's own Phone app is taken out of the page.** With the `voip` module
+installed, Odoo keeps its phone icon and its softphone next to ours, and both
+count the missed calls of the call log: a badge that only resets when Odoo's
+softphone is opened, and in Odoo 17 and 18 that softphone unfolds by itself on
+every page load. The module removes the two from Odoo's registries
+(`systray` / `voip`, `main_components` / `voip.SoftphoneContainer`). It is the
+one place where it reaches into the web client: the icon markup changes
+between versions, the two keys have not moved from 17 to 20. Before Odoo 17
+there is no `odoo.loader`, and the page is left as it is. This only hides it:
+if a user's VoIP credentials are still filled in Odoo, its softphone still
+registers and rings, so they must be emptied.
+
 **The panel is hidden, never removed from the DOM.** Removing the iframe would
 drop the SIP registration, and the ongoing conversation with it. On the website
 editor, where a floating panel would get in the way, it is stowed away in CSS.
@@ -74,6 +86,8 @@ able to speak.
 isolated per embedding site, and Safari blocks it without the Storage Access
 API. The softphone session is therefore not shared with the standalone tab, and
 a sign-in may be requested per site.
+
+**Odoo 16 and earlier.** The phone icon of Odoo's own Phone app stays.
 
 ## Protocol
 
