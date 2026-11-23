@@ -150,6 +150,43 @@
         });
     }
 
+    /* Odoo's own Phone app (module "voip", Enterprise) keeps its systray icon
+     * and its softphone next to ours. Both show the missed calls of the
+     * call log, which our connector fills: a badge that only resets when the
+     * user opens Odoo's softphone, and from 17 to 18 that softphone even
+     * unfolds by itself on every page load. So we take both out of the page.
+     *
+     * 🔴 The one place where this module reaches into the web client. The icon
+     * markup changes between versions (no "oi-voip" class any more in 20), so
+     * a CSS selector would fail silently; the two registry keys have not
+     * moved from 17 to 20, nor has the registry itself. Before 17 there is no
+     * odoo.loader: we leave the page as it is.
+     *
+     * ⚠️ This only hides it. If the user's VoIP credentials are still set in
+     * Odoo, its softphone still registers and rings: they must be emptied. */
+    var ODOO_PHONE = [['systray', 'voip'], ['main_components', 'voip.SoftphoneContainer']];
+
+    function hideOdooPhone() {
+        var loader = window.odoo && window.odoo.loader;
+        var module = loader && loader.modules && loader.modules.get('@web/core/registry');
+        var registry = module && module.registry;
+        if (!registry || typeof registry.category !== 'function') return false;
+        ODOO_PHONE.forEach(function (entry) {
+            var category = registry.category(entry[0]);
+            var drop = function () {
+                if (category.contains(entry[1])) category.remove(entry[1]);
+            };
+            // The voip service adds both when it starts, after this script:
+            // we drop them as they come, and right away if already there.
+            category.addEventListener('UPDATE', function (ev) {
+                var d = ev.detail || {};
+                if (d.operation === 'add' && d.key === entry[1]) drop();
+            });
+            drop();
+        });
+        return true;
+    }
+
     function start() {
         if (unsupportedDevice()) {
             console.info('[axivox] softphone not available on this device');
@@ -181,6 +218,10 @@
         // Hook for customisation: dial from anywhere else.
         window.AxivoxSoftphone.panel = panel;
     }
+
+    // Now, not at DOMContentLoaded: the web client may start its services
+    // first. Only where our panel will actually show up.
+    if (!unsupportedDevice() && window.AxivoxSoftphone) hideOdooPhone();
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', start);
